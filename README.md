@@ -49,7 +49,7 @@ Inside the agent container:
 
 ## Quick start (macOS + Colima + VS Code devcontainers)
 
-### 1) Install Colima + Docker CLI
+### 1. Install Colima + Docker CLI
 
 ```bash
 brew install colima docker docker-compose
@@ -58,7 +58,7 @@ colima start --cpu 4 --memory 8 --disk 60
 
 If you previously used Docker Desktop, set your Docker credential helper to `osxkeychain` (not `desktop`) in `~/.docker/config.json`.
 
-### 2) Add agent sandbox to a project
+### 2. Add agent sandbox to a project
 
 From your project root:
 
@@ -72,7 +72,7 @@ Or use the minimal template if you do not want the proxy yet:
 cp -R path/to/agent-sandbox/devcontainer/templates/minimal/.devcontainer .
 ```
 
-### 3) Open in devcontainer
+### 3. Open in devcontainer
 
 In VS Code:
 

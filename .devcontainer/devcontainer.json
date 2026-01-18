@@ -9,10 +9,7 @@
       "ZSH_IN_DOCKER_VERSION": "1.2.0"
     }
   },
-  "runArgs": [
-    "--cap-add=NET_ADMIN",
-    "--cap-add=NET_RAW"
-  ],
+  "runArgs": ["--cap-add=NET_ADMIN", "--cap-add=NET_RAW"],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -42,8 +39,12 @@
   },
   "remoteUser": "node",
   "mounts": [
+    // Per-project bash history (named volume)
     "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=/Users/matt/.claude,target=/home/node/.claude,type=bind,consistency=delegated"
+    // Per-project .claude state (named volume)
+    "source=claude-code-config-${devcontainerId},target=/home/node/.claude,type=volume",
+    // Convenience: Host claude.md injected into the volume path
+    "source=${localEnv:HOME}/.claude/CLAUDE.md,target=/home/node/.claude/CLAUDE.md,type=bind,readonly"
   ],
   "containerEnv": {
     "NODE_OPTIONS": "--max-old-space-size=4096",
