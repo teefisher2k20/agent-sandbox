@@ -28,13 +28,21 @@ colima start --cpu 4 --memory 8 --disk 60
 
 If you previously used Docker Desktop, set your Docker credential helper to `osxkeychain` (not `desktop`) in `~/.docker/config.json`.
 
-### 2. Add to your project
+### 2. Build the images
+
+```bash
+git clone https://github.com/anthropics/agent-sandbox.git
+cd agent-sandbox
+./images/build.sh
+```
+
+This builds `agent-sandbox-base:local` and `agent-sandbox-claude:local`.
+
+### 3. Add to your project
 
 Copy the `.devcontainer` directory to your project:
 
 ```bash
-# Clone agent-sandbox (or download just the .devcontainer folder)
-git clone https://github.com/anthropics/agent-sandbox.git
 cp -R agent-sandbox/.devcontainer /path/to/your/project/
 ```
 
@@ -43,7 +51,7 @@ Then open your project in VS Code:
 - Install the Dev Containers extension
 - Command Palette -> Dev Containers: Reopen in Container
 
-### 3. Authenticate Claude Code (first time only)
+### 4. Authenticate Claude Code (first time only)
 
 From your **host terminal** (not the VS Code integrated terminal):
 
@@ -64,7 +72,7 @@ This triggers the OAuth flow:
 
 Credentials persist in the agent state volume. You only need to do this once.
 
-### 4. Run Claude Code
+### 5. Run Claude Code
 
 From the VS Code integrated terminal inside the container:
 
@@ -72,6 +80,28 @@ From the VS Code integrated terminal inside the container:
 claude
 # or for auto-approve mode:
 yolo-claude
+```
+
+## Alternative: Docker Compose
+
+If you prefer compose over devcontainers:
+
+```bash
+# Build images first
+./images/build.sh
+
+# Start the container
+docker compose up -d
+
+# Exec into it
+docker compose exec agent zsh
+
+# Run Claude
+claude
+# or: yolo-claude
+
+# Stop when done
+docker compose down
 ```
 
 ## Network allowlist

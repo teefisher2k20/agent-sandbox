@@ -1,0 +1,31 @@
+# Docker Compose for agent-sandbox
+# Requires: ./images/build.sh first
+
+services:
+  agent:
+    image: agent-sandbox-claude:local
+    container_name: agent-sandbox
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      # Your project workspace
+      - .:/workspace
+      # Persist Claude credentials
+      - claude-state:/home/dev/.claude
+      # Persist shell history
+      - command-history:/commandhistory
+      # Host Claude config (optional - comment out if not needed)
+      - ${HOME}/.claude/CLAUDE.md:/home/dev/.claude/CLAUDE.md:ro
+      - ${HOME}/.claude/settings.json:/home/dev/.claude/settings.json:ro
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      - CLAUDE_CONFIG_DIR=/home/dev/.claude
+      - POWERLEVEL9K_DISABLE_GITSTATUS=true
+
+volumes:
+  claude-state:
+  command-history:
