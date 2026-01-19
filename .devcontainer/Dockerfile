@@ -79,6 +79,7 @@ RUN curl -fsSL https://claude.ai/install.sh | bash -s $CLAUDE_CODE_VERSION
 RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 RUN echo "alias ls='ls -al'" >> ~/.zshrc
 RUN echo "alias claude-yolo='cd /workspace && claude --dangerously-skip-permissions'" >> ~/.zshrc
+RUN echo "alias cy='claude-yolo'" >> ~/.zshrc
 
 # Copy and set up firewall script
 COPY init-firewall.sh /usr/local/bin/
