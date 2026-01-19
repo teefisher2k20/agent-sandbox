@@ -10,14 +10,29 @@ Target platform: [Colima](https://github.com/abiosoft/colima) + [Docker Engine](
 
 ## What it does
 
-The devcontainer in `.devcontainer/` creates a sandboxed environment for Claude Code:
+Creates a sandboxed environment for Claude Code that:
 
 - Blocks all outbound network traffic by default
 - Allows only specific domains (GitHub, npm, Anthropic APIs, etc.)
 - Runs as non-root user with limited sudo for firewall setup
 - Persists Claude credentials in a Docker volume across container rebuilds
 
-## Quick start (macOS + Colima + VS Code)
+## Runtime modes
+
+Two modes are supported, using the same images:
+
+| Mode | Best for | How to use |
+|------|----------|------------|
+| **Devcontainer** | VS Code users | Open project in Dev Container |
+| **Compose** | CLI users, non-VS Code editors | `docker compose up -d && docker compose exec agent zsh` |
+
+Both modes provide identical sandboxing. The difference is how the firewall gets initialized:
+- **Devcontainer**: VS Code bypasses Docker entrypoints, so firewall runs via `postStartCommand`
+- **Compose**: Firewall runs via the container's entrypoint script
+
+Choose based on your editor preference. The quick start below covers both.
+
+## Quick start (macOS + Colima)
 
 ### 1. Install prerequisites
 
@@ -38,7 +53,9 @@ cd agent-sandbox
 
 This builds `agent-sandbox-base:local` and `agent-sandbox-claude:local`.
 
-### 3. Add to your project
+### 3. Choose your mode
+
+#### Option A: Devcontainer (VS Code)
 
 Copy the `.devcontainer` directory to your project:
 
@@ -51,6 +68,22 @@ Then open your project in VS Code:
 - Install the Dev Containers extension
 - Command Palette -> Dev Containers: Reopen in Container
 
+#### Option B: Docker Compose (CLI)
+
+Copy `docker-compose.yml` to your project:
+
+```bash
+cp agent-sandbox/docker-compose.yml /path/to/your/project/
+```
+
+Then start the container:
+
+```bash
+cd /path/to/your/project
+docker compose up -d
+docker compose exec agent zsh
+```
+
 ### 4. Authenticate Claude Code (first time only)
 
 From your **host terminal** (not the VS Code integrated terminal):
@@ -59,7 +92,7 @@ From your **host terminal** (not the VS Code integrated terminal):
 # Find your container name
 docker ps
 
-# Exec into it (name is typically the folder name with a suffix)
+# Exec into it
 docker exec -it <container-name> zsh -i -c 'claude'
 ```
 
@@ -70,11 +103,11 @@ This triggers the OAuth flow:
 3. Paste the authorization code back into the terminal
 4. Type `/exit` to close Claude
 
-Credentials persist in the agent state volume. You only need to do this once.
+Credentials persist in a Docker volume. You only need to do this once per project.
 
 ### 5. Run Claude Code
 
-From the VS Code integrated terminal inside the container:
+From inside the container:
 
 ```bash
 claude
@@ -82,49 +115,39 @@ claude
 yolo-claude
 ```
 
-## Alternative: Docker Compose
-
-If you prefer compose over devcontainers:
+For compose mode, stop the container when done:
 
 ```bash
-# Build images first
-./images/build.sh
-
-# Start the container
-docker compose up -d
-
-# Exec into it
-docker compose exec agent zsh
-
-# Run Claude
-claude
-# or: yolo-claude
-
-# Stop when done
 docker compose down
 ```
 
 ## Network allowlist
 
-The firewall (`init-firewall.sh`) blocks all outbound by default. Currently allowed:
+The firewall (`images/base/init-firewall.sh`) blocks all outbound by default. Currently allowed:
 
 - GitHub (api, web, git) - IPs fetched dynamically from api.github.com/meta
 - registry.npmjs.org
-- api.anthropic.com - for claude-code operations
-- sentry.io, statsig.anthropic.com, statsig.com - for claude-code operations
+- api.anthropic.com - for Claude Code operations
+- sentry.io, statsig.anthropic.com, statsig.com - for Claude Code telemetry
 - VS Code marketplace and update servers
 
-To add a domain: edit `init-firewall.sh`, add to the domain loop, rebuild the container.
+To add a domain: edit `images/base/init-firewall.sh`, add to the domain loop, rebuild the images with `./images/build.sh`.
 
 ## How it works
 
-At container startup, `init-firewall.sh`:
+The firewall is initialized by `init-firewall.sh`, which:
 
 1. Creates an ipset for allowed IPs
 2. Resolves each allowed domain and adds IPs to the set
 3. Fetches GitHub's IP ranges from their meta API
 4. Sets iptables rules to DROP all outbound except to the ipset
 5. Verifies the firewall by testing that example.com is blocked and api.github.com works
+
+**Initialization differs by mode:**
+- **Compose mode**: The entrypoint script runs `init-firewall.sh` automatically
+- **Devcontainer mode**: VS Code bypasses entrypoints, so `postStartCommand` triggers initialization
+
+The script is idempotent (checks for existing rules before running), so both paths work correctly.
 
 The container runs as a non-root `dev` user with passwordless sudo only for the firewall setup commands.
 
