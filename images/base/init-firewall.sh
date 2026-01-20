@@ -144,14 +144,32 @@ else
     echo "Firewall verification passed - unable to reach https://example.com as expected"
 fi
 
-# Verify GitHub API access (only if github service is enabled)
+# Verify at least one allowed destination is reachable
+VERIFY_URL=""
+VERIFY_NAME=""
+
+# Prefer GitHub API if github service is enabled (reliable endpoint)
 if yq -r '.services // [] | .[]' "$POLICY_FILE" | grep -q "^github$"; then
-    if ! curl --connect-timeout 5 https://api.github.com/zen >/dev/null 2>&1; then
-        echo "ERROR: Firewall verification failed - unable to reach https://api.github.com"
+    VERIFY_URL="https://api.github.com/zen"
+    VERIFY_NAME="api.github.com"
+else
+    # Fall back to first domain in policy
+    FIRST_DOMAIN=$(yq -r '.domains // [] | .[0] // ""' "$POLICY_FILE")
+    if [ -n "$FIRST_DOMAIN" ]; then
+        VERIFY_URL="https://$FIRST_DOMAIN"
+        VERIFY_NAME="$FIRST_DOMAIN"
+    fi
+fi
+
+if [ -n "$VERIFY_URL" ]; then
+    if ! curl --connect-timeout 5 -m 10 "$VERIFY_URL" >/dev/null 2>&1; then
+        echo "ERROR: Firewall verification failed - unable to reach $VERIFY_NAME"
         exit 1
     else
-        echo "Firewall verification passed - able to reach https://api.github.com as expected"
+        echo "Firewall verification passed - able to reach $VERIFY_NAME"
     fi
+else
+    echo "WARNING: No services or domains in policy to verify positive connectivity"
 fi
 
 echo "Firewall initialization complete"
