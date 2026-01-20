@@ -2,17 +2,7 @@
 
 Run Claude Code in a network-locked container with egress restricted to allowed domains only.
 
-## Prerequisites
-
-Build the base images (one-time setup):
-
-```bash
-git clone https://github.com/mattolson/agent-sandbox.git
-cd agent-sandbox
-./images/build.sh
-```
-
-This creates `agent-sandbox-base:local` and `agent-sandbox-claude:local`.
+Images are published to GitHub Container Registry and pulled automatically.
 
 ## Quick Start
 
@@ -152,3 +142,48 @@ sudo iptables -L -n
 ```
 
 Should show DROP policies with an ipset match rule. If not, check `postStartCommand` (devcontainer) or entrypoint logs (compose).
+
+## Image Versioning
+
+By default, the template uses `:latest` which tracks the most recent build. For reproducibility, pin to a specific digest.
+
+### Finding the current digest
+
+```bash
+docker pull ghcr.io/mattolson/agent-sandbox-claude:latest
+docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/mattolson/agent-sandbox-claude:latest
+```
+
+### Pinning in devcontainer
+
+Edit `.devcontainer/Dockerfile`:
+
+```dockerfile
+ARG BASE_IMAGE=ghcr.io/mattolson/agent-sandbox-claude@sha256:<digest>
+```
+
+### Pinning in compose
+
+Edit `docker-compose.yml`:
+
+```yaml
+image: ghcr.io/mattolson/agent-sandbox-claude@sha256:<digest>
+```
+
+### Local development
+
+To use locally-built images instead of GHCR:
+
+```bash
+# Build images
+git clone https://github.com/mattolson/agent-sandbox.git
+cd agent-sandbox && ./images/build.sh
+
+# Override in devcontainer (rebuild required)
+# Edit .devcontainer/Dockerfile:
+ARG BASE_IMAGE=agent-sandbox-claude:local
+
+# Override in compose
+# Edit docker-compose.yml:
+image: agent-sandbox-claude:local
+```

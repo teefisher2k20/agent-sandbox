@@ -1,13 +1,13 @@
 # Claude Code Sandbox
 #
-# Requires: Build images first from the agent-sandbox repo:
-#   git clone https://github.com/mattolson/agent-sandbox.git
-#   cd agent-sandbox && ./images/build.sh
+# Uses published image from GitHub Container Registry.
+# For reproducibility, pin to a specific digest:
+#   ARG BASE_IMAGE=ghcr.io/mattolson/agent-sandbox-claude@sha256:<digest>
 #
-# Once images are published to GHCR (m2), this will use:
-#   ARG BASE_IMAGE=ghcr.io/mattolson/agent-sandbox-claude@sha256:...
+# For local development, override with:
+#   docker build --build-arg BASE_IMAGE=agent-sandbox-claude:local .
 
-ARG BASE_IMAGE=agent-sandbox-claude:local
+ARG BASE_IMAGE=ghcr.io/mattolson/agent-sandbox-claude:latest
 FROM ${BASE_IMAGE}
 
 # Copy project policy (customize policy.yaml to add domains)
