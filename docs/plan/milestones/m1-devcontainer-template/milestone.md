@@ -116,7 +116,7 @@ Extract hardcoded domains to policy.yaml and update firewall to read from it. (M
 
 Security: Policy file owned by root, not writable by dev user. Override must be mounted read-only from outside workspace.
 
-### m1.5-create-template
+### m1.5-create-template ✓
 
 Create the minimal/claude template structure with both runtime modes.
 
@@ -126,7 +126,7 @@ Create the minimal/claude template structure with both runtime modes.
 - Include policy.yaml (shared by both modes)
 - Template Dockerfile references local image build or placeholder for GHCR
 
-### m1.6-template-docs
+### m1.6-template-docs ✓
 
 Document template usage.
 
@@ -134,7 +134,7 @@ Document template usage.
 - Document policy customization (adding domains, removing services)
 - Document testing/verification steps
 
-### m1.7-test-template
+### m1.7-test-template ✓
 
 Validate template on a fresh project.
 
@@ -154,6 +154,6 @@ None (first milestone)
 - [x] Both runtime modes work (devcontainer and compose)
 - [x] Policy YAML schema defined and documented
 - [x] Firewall script reads from policy file
-- [ ] Template in devcontainer/templates/minimal/ is complete (both modes)
-- [ ] README documents usage for both modes
-- [ ] Template tested on fresh project
+- [x] Template in devcontainer/templates/minimal/ is complete (both modes)
+- [x] README documents usage for both modes
+- [x] Template tested on fresh project

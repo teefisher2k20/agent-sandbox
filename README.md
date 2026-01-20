@@ -13,9 +13,9 @@ Target platform: [Colima](https://github.com/abiosoft/colima) + [Docker Engine](
 Creates a sandboxed environment for Claude Code that:
 
 - Blocks all outbound network traffic by default
-- Allows only specific domains (GitHub, npm, Anthropic APIs, etc.)
-- Runs as non-root user with limited sudo for firewall setup
-- Persists Claude credentials in a Docker volume across container rebuilds
+- Allows only specific domains that you specify in a policy file
+- Runs as non-root user with limited sudo for firewall initialization in entrypoint
+- Persists Claude credentials and configuration in a Docker volume across container rebuilds
 
 ## Runtime modes
 
@@ -36,6 +36,8 @@ Choose based on your editor preference. The quick start below covers both.
 
 ### 1. Install prerequisites
 
+You need docker and docker-compose installed. So far we've only tested with Colima + Docker Engine, but this should work with Docker Desktop for Mac or Podman as well. Instructions that follow are for Colima.
+
 ```bash
 brew install colima docker docker-compose
 colima start --cpu 4 --memory 8 --disk 60
@@ -43,7 +45,7 @@ colima start --cpu 4 --memory 8 --disk 60
 
 If you previously used Docker Desktop, set your Docker credential helper to `osxkeychain` (not `desktop`) in `~/.docker/config.json`.
 
-### 2. Build the images
+### 2. Build the docker images
 
 ```bash
 git clone https://github.com/mattolson/agent-sandbox.git
@@ -102,7 +104,7 @@ From inside the container:
 
 ```bash
 claude
-# or for auto-approve mode:
+# or as a shortcut for `claude --dangerously-skip-permissions`:
 yolo-claude
 ```
 
@@ -190,7 +192,6 @@ Key principles:
 - Minimal mounts: only the repo workspace + project-scoped agent state
 - Prefer short-lived credentials (SSO/STS) and read-only IAM roles
 - Firewall verification runs at every container start
-- Run long-lived agent sessions in tmux so VS Code reconnects don't kill the process
 
 ## Roadmap
 
