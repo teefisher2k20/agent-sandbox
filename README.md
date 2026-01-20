@@ -45,17 +45,13 @@ colima start --cpu 4 --memory 8 --disk 60
 
 If you previously used Docker Desktop, set your Docker credential helper to `osxkeychain` (not `desktop`) in `~/.docker/config.json`.
 
-### 2. Build the docker images
+### 2. Copy template to your project
+
+Clone the repo to get the template files (images are pulled from GHCR automatically):
 
 ```bash
 git clone https://github.com/mattolson/agent-sandbox.git
-cd agent-sandbox
-./images/build.sh
 ```
-
-This builds `agent-sandbox-base:local` and `agent-sandbox-claude:local`.
-
-### 3. Choose your mode
 
 #### Option A: Devcontainer (VS Code)
 
@@ -77,7 +73,7 @@ docker compose up -d
 docker compose exec agent zsh
 ```
 
-### 4. Authenticate Claude Code (first time only)
+### 3. Authenticate Claude Code (first time only)
 
 From your **host terminal** (not the VS Code integrated terminal):
 
@@ -98,7 +94,7 @@ This triggers the OAuth flow:
 
 Credentials persist in a Docker volume. You only need to do this once per project.
 
-### 5. Run Claude Code
+### 4. Run Claude Code
 
 From inside the container:
 
